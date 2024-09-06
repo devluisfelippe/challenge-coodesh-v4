@@ -6,8 +6,8 @@ import tseslint from "typescript-eslint";
 export default [
   {
     languageOptions: { globals: globals.node },
-        rules: {
-      semi: ["error", "always"]
+    rules: {
+      semi: ["error", "always"],
     },
   },
   pluginJs.configs.recommended,

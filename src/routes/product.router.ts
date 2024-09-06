@@ -1,8 +1,14 @@
 import { Router } from "express";
+import ProductsController from "../controllers/product.controller";
 
-const router = Router();
+const productRouter = Router();
 
 
-router.get("/health_check", (req, res) => res.send({ message: "health-checked" }).status(200) );
+productRouter
+    .get("/server_details", ProductsController.getServerDetails)
+    .put("/products/:code", ProductsController.putProducts)
+    .delete("/products/:code", ProductsController.deleteProducts)
+    .get("/products/:code", ProductsController.getProductsByCode)
+    .get("/products",ProductsController.getProducts);
 
-export default router;
+export default productRouter;
