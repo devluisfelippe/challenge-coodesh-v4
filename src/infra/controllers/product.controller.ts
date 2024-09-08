@@ -49,7 +49,13 @@ class ProductsController {
     }
 
     static async getProducts(req: Request, res: Response) {
-        await productsService.findProducts();
+        try {
+            const { page } = req.query;
+            const productsWithPagination = await productsService.findProducts(page);
+            res.send(productsWithPagination).status(200);
+        } catch (error) {
+            res.send({ message: error.message }).status(400);
+        };
     }
 }
 

@@ -71,6 +71,7 @@ class ProductsDatabase implements IProductsRepository {
             throw new Error(error.message);
         }
     }
+    
     async findProducts(): Promise<Document> {
         try {
             const products = await this.productsCollection.find().toArray();

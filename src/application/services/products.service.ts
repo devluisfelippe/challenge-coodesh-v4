@@ -10,7 +10,7 @@ interface IProductsService {
     updateProduct(_code: string, productData): Promise<number>
     deleteProduct(_code: string): Promise<number>
     findProductByCode(_code: string): Promise<object>
-    findProducts(): Promise<[]>
+    findProducts(page): Promise<[]>
 }
 
 class ProductsService implements IProductsService {
@@ -72,6 +72,7 @@ class ProductsService implements IProductsService {
             throw new Error(error.message);
         }
     }
+
     async findProductByCode(_code: string): Promise<object> {
         try {
             const productFinded = await this.productsRepository.findProductByCode(_code);
@@ -80,8 +81,24 @@ class ProductsService implements IProductsService {
             throw new Error(error.message);
         }
     }
-    async findProducts(): Promise<[]> {
-        return [];
+
+    async findProducts(page): Promise<any> {
+        try {
+            const countProductsPage = 10;
+            const skipPage = (page * countProductsPage) - countProductsPage;
+            const productsFinded = await this.productsRepository.findProducts();
+            const totalProductsPage = productsFinded.slice(skipPage, skipPage + countProductsPage);
+            const totalPages = Math.ceil(productsFinded.length / countProductsPage);
+            const productsPagination = {
+                products: totalProductsPage,
+                page: page,
+                totalPages: totalPages,
+                totalProducts: totalProductsPage.length
+            };
+            return productsPagination;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 };
 
