@@ -1,89 +1,53 @@
-# Backend Challenge 20230105
+# Consume Products Open Food Facts
 
-## Introdução
+Este projeto é uma API que importa e armazena dados do Open Food Facts para uma base de dados, atualizando essas informações diariamente.
 
-Nesse desafio trabalharemos no desenvolvimento de uma REST API para utilizar os dados do projeto Open Food Facts, que é um banco de dados aberto com informação nutricional de diversos produtos alimentícios.
+## Tecnologias Utilizadas
 
-O projeto tem como objetivo dar suporte a equipe de nutricionistas da empresa Fitness Foods LC para que eles possam revisar de maneira rápida a informação nutricional dos alimentos que os usuários publicam pela aplicação móvel.
+- Linguagem: Node.js (Typescript)
+- Framework: Express
+- Banco de Dados: MongoDB
+- Gerenciador de Pacotes: npm
+- Outros: Axios, nodemon, node-cron, yup
+https://github.com/seu-usuario/nome-do-projeto.
 
-### Antes de começar
- 
-- O projeto deve utilizar a Linguagem específica na avaliação. Por exempo: Python, R, Scala e entre outras;
-- Considere como deadline da avaliação a partir do início do teste. Caso tenha sido convidado a realizar o teste e não seja possível concluir dentro deste período, avise a pessoa que o convidou para receber instruções sobre o que fazer.
-- Documentar todo o processo de investigação para o desenvolvimento da atividade (README.md no seu repositório); os resultados destas tarefas são tão importantes do que o seu processo de pensamento e decisões à medida que as completa, por isso tente documentar e apresentar os seus hipóteses e decisões na medida do possível.
+## Instalação e Uso
 
-## O projeto
- 
-- Criar um banco de dados MongoDB usando Atlas: https://www.mongodb.com/cloud/atlas ou algum Banco de Dados SQL se não sentir confortável com NoSQL;
-- Criar uma REST API com as melhores práticas de desenvolvimento, Design Patterns, SOLID e DDD.
-- Integrar a API com o banco de dados criado para persistir os dados
-- Recomendável usar Drivers oficiais para integração com o DB
-- Desenvolver Testes Unitários
+### Pré-requisitos
 
-### Modelo de Dados:
+- Docker version 27.1.2
 
-Para a definição do modelo, consultar o arquivo [products.json](./products.json) que foi exportado do Open Food Facts, um detalhe importante é que temos dois campos personalizados para poder fazer o controle interno do sistema e que deverão ser aplicados em todos os alimentos no momento da importação, os campos são:
+### Passos para Instalação
 
-- `imported_t`: campo do tipo Date com a dia e hora que foi importado;
-- `status`: campo do tipo Enum com os possíveis valores draft, trash e published;
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/devluisfelippe/challenge-coodesh-v4.git
 
-### Sistema do CRON
+2. Monte a imagem Docker:
+    ```bash
+    windows: docker compose build
+    linux: sudo docker-compose build
+    ```
+3. Suba a aplicação no Docker
+    ```bash
+    windows: docker compose up -d
+    linux: sudo docker-compose up -d
+    ```
 
-Para prosseguir com o desafio, precisaremos criar na API um sistema de atualização que vai importar os dados para a Base de Dados com a versão mais recente do [Open Food Facts](https://br.openfoodfacts.org/data) uma vez ao día. Adicionar aos arquivos de configuração o melhor horário para executar a importação.
+> Por padrão a API esta utilizando a porta 3000.
 
-A lista de arquivos do Open Food, pode ser encontrada em: 
+### Investigação para o Desenvolvimento do Sistema
 
-- https://challenges.coode.sh/food/data/json/index.txt
-- https://challenges.coode.sh/food/data/json/data-fields.txt
+1. Antes de iniciar, fiz a separação dos requisitos do sistema, no caso, os Endpoints e Serviços que seriam necessários para cumprir as necessidades especificadas, quebrei os Endpoints e Serviços em tasks menores, utilizando um editor externo pude definir melhor os Controladores, Serviços, Regra de Negócio e etc, após a definição de toda a estrutura que seria necessária para minha aplicação e sua desestruturação em tasks menores, ficou mais claro o que deveria ser feito.
 
-Onde cada linha representa um arquivo que está disponível em https://challenges.coode.sh/food/data/json/{filename}.
+2. Após toda a definição da estrutura, comecei em "camadas", da mais externa para a mais interna, então iniciei criando o servidor e suas rotas, em seguida o controller, service e etc, até chegar a camada mais interna, a principio não defini nenhum tipo de regra, minha intenção principal era deixar tudo integrado e funcionando, devolvendo apenas um status de tudo OK, pois com tudo funcionando, eu poderia focar nas regras, lógica e etc, indo lapidando o sistema, fazendo as devidas separações.
 
-É recomendável utilizar uma Collection secundária para controlar os históricos das importações e facilitar a validação durante a execução.
+3. Com o sistema rodando, pude ir melhorando cada parte, criando os contratos (Interfaces), realizando as devidas separações(aplicando algumas regras do S.O.L.I.D em alguns casos de forma mais explicita e outras formas de boas práticas) e melhorias.
 
-Ter em conta que:
+4. Com a conclusão total das estruturas a nível de Infra e Application, pude começar a criação das regras de negócio e também as separações por pastas, lembrando que durante todo o desenvolvimento fui seguindo o que foi descrito no passo 1, marcando as tasks como concluídas.
 
-- Todos os produtos deverão ter os campos personalizados `imported_t` e `status`.
-- Limitar a importação a somente 100 produtos de cada arquivo.
+5. Por fim, com todo o sistema operando comecei a desenvolver os principais testes, que seria no foi o de serviço e de rotas, eu também poderia ter desenvolvido os testes a cada metódo criado, porém optei por realizar a criação de todos no final do projeto, mas em um projeto real, a melhor prática seria construir os testes na medida que finalizava cada parte dos serviços.
 
-### A REST API
-
-Na REST API teremos um CRUD com os seguintes endpoints:
-
- - `GET /`: Detalhes da API, se conexão leitura e escritura com a base de dados está OK, horário da última vez que o CRON foi executado, tempo online e uso de memória.
- - `PUT /products/:code`: Será responsável por receber atualizações do Projeto Web
- - `DELETE /products/:code`: Mudar o status do produto para `trash`
- - `GET /products/:code`: Obter a informação somente de um produto da base de dados
- - `GET /products`: Listar todos os produtos da base de dados, adicionar sistema de paginação para não sobrecarregar o `REQUEST`.
-
-## Extras
-
-- **Diferencial 1** Configuração de um endpoint de busca com Elastic Search ou similares;
-- **Diferencial 2** Configurar Docker no Projeto para facilitar o Deploy da equipe de DevOps;
-- **Diferencial 3** Configurar um sistema de alerta se tem algum falho durante o Sync dos produtos;
-- **Diferencial 4** Descrever a documentação da API utilizando o conceito de Open API 3.0;
-- **Diferencial 5** Escrever Unit Tests para os endpoints  GET e PUT do CRUD;
-- **Diferencial 6** Escrever um esquema de segurança utilizando `API KEY` nos endpoints. Ref: https://learning.postman.com/docs/sending-requests/authorization/#api-key
-
-
-
-## Readme do Repositório
-
-- Deve conter o título do projeto
-- Uma descrição sobre o projeto em frase
-- Deve conter uma lista com linguagem, framework e/ou tecnologias usadas
-- Como instalar e usar o projeto (instruções)
-- Não esqueça o [.gitignore](https://www.toptal.com/developers/gitignore)
-- Se está usando github pessoal, referencie que é um challenge by coodesh:  
+> Obs: algumas regras de entrada como PUT /products, que defini apenas o status para alteração por não saber exatamente o que poderia ser alterado no produto, assim também fiz para a importação dos produtos direto do open food facts, no qual estou importando os produtos por inteiro, porém existe uma falha no que me é solicitado, mas seria algo que em um cenário real eu tiraria minhas dúvidas com quem definiu o projeto.
 
 >  This is a challenge by [Coodesh](https://coodesh.com/)
-
-## Finalização e Instruções para a Apresentação
-
-1. Adicione o link do repositório com a sua solução no teste
-2. Adicione o link da apresentação do seu projeto no README.md.
-3. Verifique se o Readme está bom e faça o commit final em seu repositório;
-4. Envie e aguarde as instruções para seguir. Sucesso e boa sorte. =)
-
-## Suporte
-
-Use a [nossa comunidade](https://discord.gg/rdXbEvjsWu) para tirar dúvidas sobre o processo ou envie uma mensagem diretamente a um especialista no chat da plataforma. 
