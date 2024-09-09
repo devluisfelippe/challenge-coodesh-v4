@@ -9,7 +9,6 @@ Este projeto é uma API que importa e armazena dados do Open Food Facts para uma
 - Banco de Dados: MongoDB
 - Gerenciador de Pacotes: npm
 - Outros: Axios, nodemon, node-cron, yup
-https://github.com/seu-usuario/nome-do-projeto.
 
 ## Instalação e Uso
 
