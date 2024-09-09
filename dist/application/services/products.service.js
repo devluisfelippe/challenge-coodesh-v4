@@ -1,87 +1,82 @@
-import { IProductEntity, Product, StatusProduct } from "../../domain/entities/product.entity";
-import { IProductsRepository } from "../../domain/repositories/products.repository";
-import ApiOpenFoodFacts from "../../infra/api/apiOpenFoodFacts";
-import { databaseConnected } from "../../infra/db/db.config";
-import dateConverter from "../../utils/dateConverter";
-
-interface IProductsService {
-    findServerDetails(): Promise<object>
-    insertProducts(): Promise<void>
-    updateProduct(_code: string, productData): Promise<number>
-    deleteProduct(_code: string): Promise<number>
-    findProductByCode(_code: string): Promise<object>
-    findProducts(pageNumber): Promise<{ products: [], page: number, totalPages: number, totalProducts: number }>
-}
-
-class ProductsService implements IProductsService {
-    private apiOpenFoodFacts;
-    constructor(private productsRepository: IProductsRepository) {
-        this.apiOpenFoodFacts = new ApiOpenFoodFacts();
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductsService = void 0;
+const product_entity_1 = require("../../domain/entities/product.entity");
+const apiOpenFoodFacts_1 = __importDefault(require("../../infra/api/apiOpenFoodFacts"));
+const db_config_1 = require("../../infra/db/db.config");
+const dateConverter_1 = __importDefault(require("../../utils/dateConverter"));
+class ProductsService {
+    productsRepository;
+    apiOpenFoodFacts;
+    constructor(productsRepository) {
+        this.productsRepository = productsRepository;
+        this.apiOpenFoodFacts = new apiOpenFoodFacts_1.default();
     }
-
-    async findServerDetails(): Promise<object> {
+    async findServerDetails() {
         try {
             const onlineTime = process.uptime();
             const memoryUsage = process.memoryUsage();
-            const { dbConnection } = await databaseConnected();
+            const { dbConnection } = await (0, db_config_1.databaseConnected)();
             const logCron = await this.productsRepository.findLastLog();
-            const dateLogFormatted = await dateConverter(logCron.created_at);
+            const dateLogFormatted = await (0, dateConverter_1.default)(logCron.created_at);
             const serverDetails = {
                 onlineTime: `${Math.floor(onlineTime / 3600)}h ${Math.floor((onlineTime % 3600) / 60)}min ${Math.floor(onlineTime % 60)}s`,
                 memoryUsage: `${(memoryUsage.rss / 1024 / 1024).toFixed(2)} MB`,
                 dbConnection,
                 lastCronRun: dateLogFormatted
             };
-
             return serverDetails;
-        } catch (error) {
+        }
+        catch (error) {
             throw new Error(error.message);
         }
     }
-
-    async insertProducts(): Promise<void> {
+    async insertProducts() {
         try {
-            const products: IProductEntity[] = await this.apiOpenFoodFacts.getProducts();
+            const products = await this.apiOpenFoodFacts.getProducts();
             await this.productsRepository.createProducts(products);
-        } catch (error) {
+        }
+        catch (error) {
             throw new Error(error.message);
         }
     }
-
-    async updateProduct(_code: string, productData): Promise<number> {
+    async updateProduct(_code, productData) {
         try {
             const productFinded = await this.productsRepository.findProductByCode(_code);
-            const productUpdate = new Product(productFinded);
+            const productUpdate = new product_entity_1.Product(productFinded);
             productUpdate.updateStatus(productData);
             const productUpdated = await this.productsRepository.updateProduct(_code, productUpdate.getStatus());
             return productUpdated;
-        } catch (error) {
+        }
+        catch (error) {
             throw new Error(error.message);
         }
     }
-
-    async deleteProduct(_code: string): Promise<number> {
+    async deleteProduct(_code) {
         try {
             const productFinded = await this.productsRepository.findProductByCode(_code);
-            const productDelete = new Product(productFinded);
-            productDelete.updateStatus(StatusProduct.TRASH);
+            const productDelete = new product_entity_1.Product(productFinded);
+            productDelete.updateStatus(product_entity_1.StatusProduct.TRASH);
             const productDeteled = await this.productsRepository.updateProduct(_code, productDelete.getStatus());
             return productDeteled;
-        } catch (error) {
+        }
+        catch (error) {
             throw new Error(error.message);
         }
     }
-
-    async findProductByCode(_code: string): Promise<object> {
+    async findProductByCode(_code) {
         try {
             const productFinded = await this.productsRepository.findProductByCode(_code);
             return productFinded;
-        } catch (error) {
+        }
+        catch (error) {
             throw new Error(error.message);
         }
     }
-
-    async findProducts(pageNumber): Promise<{ products: [], page: number, totalPages: number, totalProducts: number}> {
+    async findProducts(pageNumber) {
         try {
             const countProductsPage = 10;
             const page = pageNumber ? pageNumber : 1;
@@ -96,10 +91,11 @@ class ProductsService implements IProductsService {
                 totalProducts: totalProductsPage.length
             };
             return productsPagination;
-        } catch (error) {
+        }
+        catch (error) {
             throw new Error(error.message);
         }
     }
-};
-
-export { IProductsService, ProductsService };
+}
+exports.ProductsService = ProductsService;
+;

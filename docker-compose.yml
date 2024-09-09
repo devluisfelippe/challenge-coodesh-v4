@@ -1,0 +1,18 @@
+version: "3.2"
+
+#name: challeng-coodesh-v4
+
+services:
+
+  challenge-coodesh-v4:
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile_Challenge
+    ports:
+      - "3000:3000"
+    networks:
+      - challengcoodeshv4
+
+networks:
+  challengcoodeshv4:

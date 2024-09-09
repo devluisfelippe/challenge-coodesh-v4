@@ -6,8 +6,9 @@ interface IProductsRepository {
     findLastLog(): Promise<Document>
     createProducts(products: IProductEntity[]): Promise<void>
     updateProduct(_code: string, status: string): Promise<number>
-    findProductByCode(_code: string): Promise<any>
-    findProducts(): Promise<Document>
+    findProductByCode(_code: string)
+    findProducts(): Promise<Document>,
+    deleteProduct(_code): Promise<number>
 }
 
 class ProductsDatabase implements IProductsRepository {
@@ -56,14 +57,13 @@ class ProductsDatabase implements IProductsRepository {
                 { "code": _code },
                 { $set: { status: status } }
             );
-            console.log(productUpdated);
             return productUpdated.modifiedCount;
         } catch (error) {
             throw new Error(error.message);
         }
     }
 
-    async findProductByCode(_code: string): Promise<any> {
+    async findProductByCode(_code: string): Promise<Document | undefined> {
         try {
             const product = await this.productsCollection.findOne({ code: _code });
             return product;
@@ -71,6 +71,7 @@ class ProductsDatabase implements IProductsRepository {
             throw new Error(error.message);
         }
     }
+
     async findProducts(): Promise<Document> {
         try {
             const products = await this.productsCollection.find().toArray();
@@ -78,6 +79,15 @@ class ProductsDatabase implements IProductsRepository {
         } catch (error) {
             throw new Error(error.message);
         };
+    }
+
+    async deleteProduct(_code): Promise<number> {
+        try {
+            const productDeleted = await this.productsCollection.deleteOne({ code: _code });
+            return productDeleted.deletedCount;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 }
 
